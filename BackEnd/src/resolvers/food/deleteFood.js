@@ -15,3 +15,4 @@ export const deleteFood = async (req, res) => {
     res.status(500).send({ message: 'Error deleting food', error: error.message });
   }
 };
+  
