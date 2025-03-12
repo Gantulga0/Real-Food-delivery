@@ -12,10 +12,11 @@ export default function Home() {
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Regex for email and password
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/; // At least 6 characters, letters and numbers
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +44,7 @@ export default function Home() {
     }
 
     console.log('Logging in...', { email, password });
-    setError(null); // Reset error if everything is fine
+    setError(null);
   };
 
   return (
@@ -91,19 +92,28 @@ export default function Home() {
               >
                 Password
               </Label>
-              <Input
-                type="password"
-                id="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className={`w-[350px] h-[50px] rounded-3xl mt-2 border-gray-400 font-sans ${
-                  !passwordRegex.test(password) && password !== ''
-                    ? 'border-red-500'
-                    : ''
-                }`}
-              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className={`w-[350px] h-[50px] rounded-3xl mt-2 border-gray-400 font-sans ${
+                    !passwordRegex.test(password) && password !== ''
+                      ? 'border-red-500'
+                      : ''
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-[-20px] top-1/2 transform -translate-y-1/2"
+                >
+                  {showPassword ? <EyeClosed size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
             <div className="mb-4 text-black">
@@ -113,19 +123,32 @@ export default function Home() {
               >
                 Confirm-Password
               </Label>
-              <Input
-                type="password"
-                id="confirm-password"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className={`w-[350px] h-[50px] rounded-3xl mt-2 border-gray-400 font-sans ${
-                  confirmPassword !== password && confirmPassword !== ''
-                    ? 'border-red-500'
-                    : ''
-                }`}
-              />
+              <div className="relative">
+                <Input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  id="confirm-password"
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className={`w-[350px] h-[50px] rounded-3xl mt-2 border-gray-400 font-sans ${
+                    confirmPassword !== password && confirmPassword !== ''
+                      ? 'border-red-500'
+                      : ''
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-[-20px] top-1/2 transform -translate-y-1/2"
+                >
+                  {showConfirmPassword ? (
+                    <EyeClosed size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
+              </div>
             </div>
 
             {error && <div className="text-red-600 text-sm mb-4">{error}</div>}
