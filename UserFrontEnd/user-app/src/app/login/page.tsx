@@ -6,22 +6,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye } from 'lucide-react';
 import { EyeClosed } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import axios, { AxiosError } from 'axios';
 
 export default function Home() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [message, setMessage] = useState<string>('');
 
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (email === '' || password === '' || confirmPassword === '') {
+    if (email === '' || password === '') {
       setError('Both email and password are required.');
       return;
     }
@@ -38,13 +41,29 @@ export default function Home() {
       return;
     }
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
-    console.log('Logging in...', { email, password });
     setError(null);
+    setMessage('');
+
+    try {
+      const response = await axios.post('http://localhost:4000/auth/sign-in', {
+        email,
+        password,
+      });
+
+      setMessage(response.data.message);
+
+      router.push('/');
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          setError(error.response.data.message);
+        } else {
+          setError('An unknown error occurred');
+        }
+      } else {
+        setError('An error occurred. Please try again.');
+      }
+    }
   };
 
   return (
@@ -124,6 +143,9 @@ export default function Home() {
             </div>
 
             {error && <div className="text-red-600 text-sm mb-4">{error}</div>}
+            {message && (
+              <div className="text-green-600 text-sm mb-4">{message}</div>
+            )}
 
             <Button
               type="submit"

@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye } from 'lucide-react';
 import { EyeClosed } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import axios, { AxiosError } from 'axios';
 
 export default function Home() {
   const [email, setEmail] = useState<string>('');
@@ -14,11 +16,14 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [message, setMessage] = useState<string>('');
 
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (email === '' || password === '' || confirmPassword === '') {
@@ -45,6 +50,26 @@ export default function Home() {
 
     console.log('Logging in...', { email, password });
     setError(null);
+    try {
+      const response = await axios.post('http://localhost:4000/auth/sign-up', {
+        email,
+        password,
+      });
+
+      setMessage(response.data.message);
+
+      router.push('/login');
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          setError(error.response.data.message);
+        } else {
+          setError('An unknown error occurred');
+        }
+      } else {
+        setError('An error occurred. Please try again.');
+      }
+    }
   };
 
   return (
