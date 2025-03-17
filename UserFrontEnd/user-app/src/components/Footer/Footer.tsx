@@ -16,7 +16,7 @@ const Footer = () => {
     try {
       const response = await axios.get('http://localhost:4000/food-category');
       setMessage(response.data.message);
-      setCategories(response.data.categories); // Set the fetched categories
+      setCategories(response.data.categories);
       console.log(response.data.categories);
 
       router.push('/');
