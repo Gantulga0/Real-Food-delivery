@@ -50,6 +50,8 @@ export default function Home() {
         password,
       });
 
+      localStorage.setItem('authToken', response.data.token);
+
       setMessage(response.data.message);
 
       router.push('/');

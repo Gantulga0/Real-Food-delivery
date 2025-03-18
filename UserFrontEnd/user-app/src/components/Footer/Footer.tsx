@@ -1,45 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
 import { Facebook } from 'lucide-react';
 import { Instagram } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const Footer = () => {
-  const [message, setMessage] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<any[]>([]);
-
-  const router = useRouter();
-
-  const fetchData = async () => {
-    try {
-      const response = await axios.get('http://localhost:4000/food-category');
-      setMessage(response.data.message);
-      setCategories(response.data.categories);
-      console.log(response.data.categories);
-
-      router.push('/');
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        if (error.response) {
-          setError(error.response.data.message);
-        } else {
-          setError('An unknown error occurred');
-        }
-      } else {
-        setError('An error occurred. Please try again.');
-      }
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   return (
     <div className="w-full bg-black h-[755px] pt-16">
       <div className="bg-red-500 w-full h-24 flex gap-7 items-center overflow-x whitespace-nowrap mb-20">
