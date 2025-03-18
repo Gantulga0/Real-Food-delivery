@@ -1,7 +1,7 @@
 import { Users } from '../../models/user.schema.js';
 
 export const getUser = async (req, res) => {
-  const { email } = req.params;
+  const { email } = req.user;
 
   try {
     const user = await Users.findOne({ email });
