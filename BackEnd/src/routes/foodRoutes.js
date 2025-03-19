@@ -7,6 +7,6 @@ import { deleteFood } from '../resolvers/food/deleteFood.js';
 export const foodRouter = express.Router();
 
 foodRouter.post('/', createFood);
-foodRouter.get('/:foodId', getFood);
+foodRouter.get('/', getFood);
 foodRouter.patch('/:foodId', updateFood);
 foodRouter.delete('/:foodId', deleteFood);
