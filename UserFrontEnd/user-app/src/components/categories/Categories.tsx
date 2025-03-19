@@ -48,7 +48,7 @@ export const CategoryList = () => {
   const FoodData = async (categoryId: string) => {
     try {
       const foodResponse = await axios.get(`http://localhost:4000/food`);
-      setFoods(foodResponse.data.foods); // Update state with fetched foods
+      setFoods(foodResponse.data.foods);
     } catch (err) {
       setError('Failed to fetch foods');
     }
