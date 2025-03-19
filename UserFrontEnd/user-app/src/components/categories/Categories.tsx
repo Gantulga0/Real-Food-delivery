@@ -26,7 +26,6 @@ export const CategoryList = () => {
       const categoryResponse = await axios.get<{ categories: Category[] }>(
         'http://localhost:4000/food-category'
       );
-
       console.log('API Response:', categoryResponse.data);
 
       const data = categoryResponse.data.categories;
@@ -45,23 +44,35 @@ export const CategoryList = () => {
     }
   };
 
-  const FoodData = async (categoryId: string) => {
+  const FoodData = async (categoryId: string | null) => {
+    if (!categoryId) return;
+
+    console.log('Fetching foods for categoryId:', categoryId);
+
     try {
-      const foodResponse = await axios.get(`http://localhost:4000/food`);
+      const foodResponse = await axios.get(`http://localhost:4000/food`, {
+        params: { categoryId },
+      });
       setFoods(foodResponse.data.foods);
     } catch (err) {
+      console.error('Error fetching foods:', err);
       setError('Failed to fetch foods');
     }
   };
 
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    FoodData(categoryId);
   };
 
   useEffect(() => {
     CategoryData();
   }, []);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      FoodData(selectedCategory);
+    }
+  }, [selectedCategory]);
 
   if (loading) return <p className="text-white">Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
