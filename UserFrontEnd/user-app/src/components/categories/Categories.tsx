@@ -53,6 +53,11 @@ export const CategoryList = () => {
       const foodResponse = await axios.get(`http://localhost:4000/food`, {
         params: { categoryId },
       });
+
+      if (foodResponse.data.foods.length === 0) {
+        console.log('No foods available for this category.');
+      }
+
       setFoods(foodResponse.data.foods);
     } catch (err) {
       console.error('Error fetching foods:', err);
@@ -100,20 +105,26 @@ export const CategoryList = () => {
       {selectedCategory && (
         <div className="mt-8">
           <h3 className="text-white text-2xl">Foods</h3>
-          <div className="grid grid-cols-3 gap-6 mt-6">
-            {foods.map((food, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg shadow-md">
-                <img
-                  src={food.image}
-                  alt={food.foodName}
-                  className="w-full h-40 object-cover rounded-lg"
-                />
-                <h4 className="text-xl mt-2">{food.foodName}</h4>
-                <p className="text-sm text-gray-500">{food.ingredients}</p>
-                <p className="text-lg font-semibold">${food.price}</p>
-              </div>
-            ))}
-          </div>
+          {foods.length === 0 ? (
+            <p className="text-white mt-4">
+              No foods available in this category
+            </p>
+          ) : (
+            <div className="grid grid-cols-3 gap-6 mt-6">
+              {foods.map((food, index) => (
+                <div key={index} className="bg-white p-4 rounded-lg shadow-md">
+                  <img
+                    src={food.image}
+                    alt={food.foodName}
+                    className="w-full h-40 object-cover rounded-lg"
+                  />
+                  <h4 className="text-xl mt-2">{food.foodName}</h4>
+                  <p className="text-sm text-gray-500">{food.ingredients}</p>
+                  <p className="text-lg font-semibold">${food.price}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
