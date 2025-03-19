@@ -1,14 +1,25 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Badge } from '@/components/ui/badge';
 
 interface Category {
   categoryName: string;
+  _id: string;
+}
+
+interface Food {
+  foodName: string;
+  price: number;
+  image: string;
+  ingredients: string;
 }
 
 export const CategoryList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [foods, setFoods] = useState<Food[]>([]);
 
   const CategoryData = async () => {
     try {
@@ -21,8 +32,7 @@ export const CategoryList = () => {
       const data = categoryResponse.data.categories;
 
       if (Array.isArray(data)) {
-        const categoryNames = data.map((item) => item.categoryName);
-        setCategories(categoryNames);
+        setCategories(data);
       } else {
         setError('Unexpected data format');
       }
@@ -35,6 +45,20 @@ export const CategoryList = () => {
     }
   };
 
+  const FoodData = async (categoryId: string) => {
+    try {
+      const foodResponse = await axios.get(`http://localhost:4000/food`);
+      setFoods(foodResponse.data.foods); // Update state with fetched foods
+    } catch (err) {
+      setError('Failed to fetch foods');
+    }
+  };
+
+  const handleCategoryClick = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    FoodData(categoryId);
+  };
+
   useEffect(() => {
     CategoryData();
   }, []);
@@ -43,13 +67,44 @@ export const CategoryList = () => {
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div>
-      <h2 className="text-white">Categories:</h2>
-      <ul className="text-black">
-        {categories.map((categoryName, index) => (
-          <li key={index}>{categoryName}</li>
+    <div className="px-80 mt-8">
+      <h2 className="text-white text-3xl font-semibold">Categories</h2>
+      <ul className="text-black flex gap-10 mt-9">
+        {categories.map((category, index) => (
+          <Badge
+            key={index}
+            variant={
+              selectedCategory === category._id ? 'outline' : 'secondary'
+            }
+            className={`text-xl px-3 rounded-full cursor-pointer ${
+              selectedCategory === category._id ? 'bg-red-500 text-white' : ''
+            }`}
+            onClick={() => handleCategoryClick(category._id)}
+          >
+            {category.categoryName}
+          </Badge>
         ))}
       </ul>
+
+      {selectedCategory && (
+        <div className="mt-8">
+          <h3 className="text-white text-2xl">Foods</h3>
+          <div className="grid grid-cols-3 gap-6 mt-6">
+            {foods.map((food, index) => (
+              <div key={index} className="bg-white p-4 rounded-lg shadow-md">
+                <img
+                  src={food.image}
+                  alt={food.foodName}
+                  className="w-full h-40 object-cover rounded-lg"
+                />
+                <h4 className="text-xl mt-2">{food.foodName}</h4>
+                <p className="text-sm text-gray-500">{food.ingredients}</p>
+                <p className="text-lg font-semibold">${food.price}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
