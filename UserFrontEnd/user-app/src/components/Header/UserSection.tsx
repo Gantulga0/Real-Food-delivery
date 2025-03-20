@@ -18,7 +18,6 @@ export const UserSection = () => {
       });
 
       setUser(userResponse.data.user);
-      setLoading(false);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 401) {
@@ -38,7 +37,6 @@ export const UserSection = () => {
     UserData();
   }, []);
 
-  if (loading) return <p className="text-white">Loading...</p>;
   if (user) return <LogedIn />;
   return <LoggedOut />;
 };

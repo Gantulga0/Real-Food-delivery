@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardFooter, CardHeader } from '@/components/ui/card';
+import Image from 'next/image';
 
 interface Category {
   categoryName: string;
@@ -112,16 +114,26 @@ export const CategoryList = () => {
           ) : (
             <div className="grid grid-cols-3 gap-6 mt-6">
               {foods.map((food, index) => (
-                <div key={index} className="bg-white p-4 rounded-lg shadow-md">
-                  <img
-                    src={food.image}
-                    alt={food.foodName}
-                    className="w-full h-40 object-cover rounded-lg"
-                  />
-                  <h4 className="text-xl mt-2">{food.foodName}</h4>
-                  <p className="text-sm text-gray-500">{food.ingredients}</p>
-                  <p className="text-lg font-semibold">${food.price}</p>
-                </div>
+                <Card
+                  key={index}
+                  className="w-full max-w-[200px] mx-auto cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:opacity-80"
+                >
+                  <CardHeader className="p-0">
+                    <Image
+                      src={food.image}
+                      alt={food.foodName}
+                      className="object-cover rounded"
+                      width={250}
+                      height={350}
+                      quality={100}
+                    />
+                  </CardHeader>
+                  <CardFooter className="flex flex-col p-2 items-start">
+                    <div className="h-14 overflow-hidden text-ellipsis line-clamp-2 text-lg text-foreground">
+                      {food.foodName}
+                    </div>
+                  </CardFooter>
+                </Card>
               ))}
             </div>
           )}

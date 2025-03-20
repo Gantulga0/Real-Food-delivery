@@ -1,7 +1,14 @@
-import type { NextConfig } from "next";
+// next.config.js
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const nextConfig = {
+  images: {
+    domains: [
+      'images.alphacoders.com',
+      'c4.wallpaperflare.com',
+      'c0.wallpaperflare.com',
+      'c1.wallpaperflare.com',
+    ],
+  },
 };
 
 export default nextConfig;

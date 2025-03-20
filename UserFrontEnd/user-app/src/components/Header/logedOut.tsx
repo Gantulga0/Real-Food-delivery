@@ -3,7 +3,7 @@ import { Button } from '../ui/button';
 
 export const LoggedOut = () => {
   return (
-    <>
+    <div className="flex gap-3">
       <Link href="/login">
         <Button variant={'secondary'} className="rounded-3xl">
           Sign Up
@@ -18,6 +18,6 @@ export const LoggedOut = () => {
           Log in
         </Button>
       </Link>
-    </>
+    </div>
   );
 };
