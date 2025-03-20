@@ -11,6 +11,12 @@ export const UserSection = () => {
   const UserData = async () => {
     try {
       const token = localStorage.getItem('authToken');
+      if (!token) {
+        setError('No authentication token found.');
+        setLoading(false);
+        return;
+      }
+
       const userResponse = await axios.get('http://localhost:4000/auth', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -18,7 +24,9 @@ export const UserSection = () => {
       });
 
       setUser(userResponse.data.user);
+      setLoading(false);
     } catch (err: unknown) {
+      setLoading(false);
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 401) {
           setError('You are not authorized. Please log in.');
@@ -37,6 +45,17 @@ export const UserSection = () => {
     UserData();
   }, []);
 
-  if (user) return <LogedIn />;
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p className="text-red-500">{error}</p>;
+  }
+
+  if (user) {
+    return <LogedIn />;
+  }
+
   return <LoggedOut />;
 };
