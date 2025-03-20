@@ -1,8 +1,13 @@
+import mongoose from 'mongoose';
 import { Food } from '../../models/food.schema.js';
 
 export const updateFood = async (req, res) => {
   const { _id } = req.params;
   const updateData = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(_id)) {
+    return res.status(400).send({ message: 'Invalid Food ID' });
+  }
 
   try {
     const updatedFood = await Food.findByIdAndUpdate(_id, updateData, {

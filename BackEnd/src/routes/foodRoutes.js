@@ -8,5 +8,5 @@ export const foodRouter = express.Router();
 
 foodRouter.post('/', createFood);
 foodRouter.get('/', getFood);
-foodRouter.patch('/:foodId', updateFood);
-foodRouter.delete('/:foodId', deleteFood);
+foodRouter.patch('/:_id', updateFood);
+foodRouter.delete('/:_id', deleteFood);
