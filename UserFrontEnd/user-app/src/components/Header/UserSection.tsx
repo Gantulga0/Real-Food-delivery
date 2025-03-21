@@ -49,10 +49,6 @@ export const UserSection = () => {
     return <p>Loading...</p>;
   }
 
-  if (error) {
-    return <p className="text-red-500">{error}</p>;
-  }
-
   if (user) {
     return <LogedIn />;
   }

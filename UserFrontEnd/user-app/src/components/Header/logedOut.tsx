@@ -4,13 +4,13 @@ import { Button } from '../ui/button';
 export const LoggedOut = () => {
   return (
     <div className="flex gap-3">
-      <Link href="/login">
+      <Link href="/signup">
         <Button variant={'secondary'} className="rounded-3xl">
           Sign Up
         </Button>
       </Link>
 
-      <Link href="/signup">
+      <Link href="/login">
         <Button
           variant={'secondary'}
           className="bg-red-500 text-white hover:bg-red-400 rounded-3xl"

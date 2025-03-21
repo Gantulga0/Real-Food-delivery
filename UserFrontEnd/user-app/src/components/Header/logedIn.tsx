@@ -7,23 +7,23 @@ import {
   LogOut,
 } from 'lucide-react';
 import { Button } from '../ui/button';
+import { Input } from '@/components/ui/input';
 import axios from 'axios';
-import { useRouter } from 'next/navigation'; // Make sure to use next/router
+import { useRouter } from 'next/navigation';
+
 
 export const LogedIn = () => {
-  const [emailVisible, setEmailVisible] = useState(false); // To toggle email visibility
-  const [userEmail, setUserEmail] = useState<string | null>(null); // Store fetched email
-  const [loading, setLoading] = useState(false); // Loading state
-  const router = useRouter(); // useRouter hook from next/router
+  const [emailVisible, setEmailVisible] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const [isMounted, setIsMounted] = useState(false); // For preventing SSR issues
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Prevents SSR issues with router
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Handle user profile click to toggle email visibility and fetch user data
   const handleUserClick = async () => {
     setEmailVisible(!emailVisible);
 
@@ -36,7 +36,6 @@ export const LogedIn = () => {
           return;
         }
 
-        // Fetch user email from backend
         const response = await axios.get('http://localhost:4000/auth', {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -63,12 +62,15 @@ export const LogedIn = () => {
 
   return (
     <div className="flex gap-3">
-      <Button variant={'secondary'} className="rounded-3xl">
-        <MapPinPlusInside className="text-red-400" />
-        <p className="text-red-400">Delivery address:</p>
-        <p>Add Location</p>
-        <ChevronRight />
-      </Button>
+      <div className="flex items-center border border-gray-300 rounded-3xl bg-white px-2">
+        <MapPinPlusInside className="text-red-400 mr-2" />
+        <Input
+          type="email"
+          placeholder="Add location"
+          className="flex-1 text-gray-800 text-sm border-none focus:outline-none "
+        />
+        <ChevronRight className="ml-auto text-gray-600" />
+      </div>
 
       <Button variant={'secondary'} className="rounded-full w-9">
         <ShoppingCart />
@@ -82,20 +84,24 @@ export const LogedIn = () => {
       </Button>
 
       {emailVisible && (
-        <div className="text-white mt-2">
+        <div className="mt-2 absolute w-[188px] h-[104px] top-12 right-[240px] bg-white flex flex-col items-center">
           {loading ? (
             <p>Loading...</p>
           ) : (
-            <p>{userEmail || 'Email not available'}</p>
+            <p className="text-xl font-semibold pt-3 pb-2">
+              {userEmail || 'Email not available'}
+            </p>
           )}
+          <Button
+            variant="secondary"
+            className="rounded-full w-[150px]"
+            onClick={handleLogout}
+          >
+            Log out
+            <LogOut />
+          </Button>
         </div>
       )}
-      <Button
-        className="bg-red-600 rounded-full w-9 hover:bg-red-300"
-        onClick={handleLogout}
-      >
-        <LogOut />
-      </Button>
     </div>
   );
 };

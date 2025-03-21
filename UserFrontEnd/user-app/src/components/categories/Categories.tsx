@@ -17,12 +17,21 @@ interface Food {
   ingredients: string;
 }
 
+interface FoodItem {
+  name: string;
+  price: number;
+}
+
 export const CategoryList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [foods, setFoods] = useState<Food[]>([]);
+  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
+
+  const userId = 'USER_ID';
 
   const CategoryData = async () => {
     try {
@@ -68,8 +77,40 @@ export const CategoryList = () => {
     }
   };
 
+  const handleAddOrder = (food: Food) => {
+    setFoodItems((prevItems) => {
+      const updatedItems = [
+        ...prevItems,
+        { name: food.foodName, price: food.price },
+      ];
+      setTotalPrice(
+        updatedItems.reduce((total, item) => total + item.price, 0)
+      );
+      return updatedItems;
+    });
+  };
+
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);
+  };
+
+  const handlePlaceOrder = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post('http://localhost:4000/food-order', {
+        _id: userId,
+        foodItems: foodItems,
+        totalPrice: totalPrice,
+      });
+
+      alert('Order created successfully!');
+      console.log(response.data);
+    } catch (error) {
+      alert('Error creating order!');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -128,7 +169,10 @@ export const CategoryList = () => {
                       height={210}
                       quality={100}
                     />
-                    <Button className="w-11 h-11 rounded-full bg-white text-red-500 hover:bg-gray-300 absolute top-3/4 left-[310px]">
+                    <Button
+                      className="w-11 h-11 rounded-full bg-white text-red-500 hover:bg-gray-300 absolute top-3/4 left-[310px]"
+                      onClick={() => handleAddOrder(food)}
+                    >
                       +
                     </Button>
                   </CardHeader>
@@ -137,7 +181,6 @@ export const CategoryList = () => {
                       {food.foodName}
                     </div>
                     <div className="overflow-hidden text-ellipsis line-clamp-2 text-xl text-foreground h-8 flex items-center">
-                      {' '}
                       {food.price}
                     </div>
                   </CardFooter>
@@ -146,6 +189,30 @@ export const CategoryList = () => {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {foodItems.length > 0 && (
+        <div className="mt-8">
+          <h4 className="text-white text-xl">Your Order</h4>
+          <ul className="text-white mt-4">
+            {foodItems.map((item, index) => (
+              <li key={index} className="flex justify-between">
+                <span>{item.name}</span>
+                <span>{item.price}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 flex justify-between">
+            <span className="text-white text-xl">Total Price</span>
+            <span className="text-white text-xl">{totalPrice}</span>
+          </div>
+          <Button
+            onClick={handlePlaceOrder}
+            className="mt-6 w-full bg-red-500 text-white"
+          >
+            Place Order
+          </Button>
         </div>
       )}
     </div>
