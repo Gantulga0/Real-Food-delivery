@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { Card, CardFooter, CardHeader } from '@/components/ui/card';
 import axios from 'axios';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardFooter, CardHeader } from '@/components/ui/card';
 import Image from 'next/image';
 import { Button } from '../ui/button';
+import FoodDetailsModal from '../FoodDetail';
+import { ShoppingCart } from 'lucide-react';
 
 interface Category {
   categoryName: string;
@@ -30,6 +32,8 @@ export const CategoryList = () => {
   const [foods, setFoods] = useState<Food[]>([]);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFood, setSelectedFood] = useState<Food | null>(null);
 
   const userId = 'USER_ID';
 
@@ -81,7 +85,7 @@ export const CategoryList = () => {
     setFoodItems((prevItems) => {
       const updatedItems = [
         ...prevItems,
-        { name: food.foodName, price: food.price },
+        { name: food.foodName, price: food.price, image: food.image },
       ];
       setTotalPrice(
         updatedItems.reduce((total, item) => total + item.price, 0)
@@ -92,6 +96,7 @@ export const CategoryList = () => {
 
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);
+    FoodData(categoryId);
   };
 
   const handlePlaceOrder = async () => {
@@ -113,15 +118,23 @@ export const CategoryList = () => {
     }
   };
 
+  const openFoodDetails = (food: Food) => {
+    setSelectedFood(food);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const addToCart = (food: Food) => {
+    handleAddOrder(food);
+    closeModal();
+  };
+
   useEffect(() => {
     CategoryData();
   }, []);
-
-  useEffect(() => {
-    if (selectedCategory) {
-      FoodData(selectedCategory);
-    }
-  }, [selectedCategory]);
 
   if (loading) return <p className="text-white">Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
@@ -159,6 +172,7 @@ export const CategoryList = () => {
                 <Card
                   key={index}
                   className="w-full max-w-[400px] cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:opacity-80 p-3 flex flex-col flex-wrap"
+                  onClick={() => openFoodDetails(food)}
                 >
                   <CardHeader className="p-0 relative">
                     <Image
@@ -193,27 +207,39 @@ export const CategoryList = () => {
       )}
 
       {foodItems.length > 0 && (
-        <div className="mt-8">
-          <h4 className="text-white text-xl">Your Order</h4>
-          <ul className="text-white mt-4">
+        <div className="w-[826px] h-screen bg-white right-0 top-0 fixed flex flex-col justify-start">
+          <div className="flex">
+            {' '}
+            <ShoppingCart />
+            <h4 className="text-sm">Order Detail</h4>
+          </div>
+          <div className="mt-4">
             {foodItems.map((item, index) => (
-              <li key={index} className="flex justify-between">
+              <div key={index} className="flex justify-between">
                 <span>{item.name}</span>
                 <span>{item.price}</span>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
           <div className="mt-4 flex justify-between">
-            <span className="text-white text-xl">Total Price</span>
-            <span className="text-white text-xl">{totalPrice}</span>
+            <span className=" text-xl">Total Price</span>
+            <span className=" text-xl">{totalPrice}</span>
           </div>
           <Button
             onClick={handlePlaceOrder}
-            className="mt-6 w-full bg-red-500 text-white"
+            className="mt-6 w-full bg-red-500 "
           >
             Place Order
           </Button>
         </div>
+      )}
+
+      {isModalOpen && selectedFood && (
+        <FoodDetailsModal
+          food={selectedFood}
+          onClose={closeModal}
+          onAddToCart={addToCart}
+        />
       )}
     </div>
   );
