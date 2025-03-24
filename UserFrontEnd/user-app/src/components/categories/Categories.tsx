@@ -34,6 +34,7 @@ export const CategoryList = () => {
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
+  const [viewMode, setViewMode] = useState<'card' | 'order'>('card'); // Manage view mode
 
   const userId = 'USER_ID';
 
@@ -42,19 +43,14 @@ export const CategoryList = () => {
       const categoryResponse = await axios.get<{ categories: Category[] }>(
         'http://localhost:4000/food-category'
       );
-      console.log('API Response:', categoryResponse.data);
-
       const data = categoryResponse.data.categories;
-
       if (Array.isArray(data)) {
         setCategories(data);
       } else {
         setError('Unexpected data format');
       }
-
       setLoading(false);
     } catch (err) {
-      console.error('Error fetching categories:', err);
       setError('Failed to fetch categories');
       setLoading(false);
     }
@@ -62,8 +58,6 @@ export const CategoryList = () => {
 
   const FoodData = async (categoryId: string | null) => {
     if (!categoryId) return;
-
-    console.log('Fetching foods for categoryId:', categoryId);
 
     try {
       const foodResponse = await axios.get(`http://localhost:4000/food`, {
@@ -76,7 +70,6 @@ export const CategoryList = () => {
 
       setFoods(foodResponse.data.foods);
     } catch (err) {
-      console.error('Error fetching foods:', err);
       setError('Failed to fetch foods');
     }
   };
@@ -85,7 +78,7 @@ export const CategoryList = () => {
     setFoodItems((prevItems) => {
       const updatedItems = [
         ...prevItems,
-        { name: food.foodName, price: food.price, image: food.image },
+        { name: food.foodName, price: food.price },
       ];
       setTotalPrice(
         updatedItems.reduce((total, item) => total + item.price, 0)
@@ -109,7 +102,10 @@ export const CategoryList = () => {
       });
 
       alert('Order created successfully!');
-      console.log(response.data);
+      // Clear cart after placing the order
+      setFoodItems([]);
+      setTotalPrice(0);
+      setViewMode('card');
     } catch (error) {
       alert('Error creating order!');
       console.error(error);
@@ -130,6 +126,10 @@ export const CategoryList = () => {
   const addToCart = (food: Food) => {
     handleAddOrder(food);
     closeModal();
+  };
+
+  const toggleCartView = () => {
+    setViewMode(viewMode === 'order' ? 'card' : 'order');
   };
 
   useEffect(() => {
@@ -206,13 +206,36 @@ export const CategoryList = () => {
         </div>
       )}
 
-      {foodItems.length > 0 && (
+      <Button
+        onClick={toggleCartView}
+        className="fixed bottom-8 right-8 bg-red-500 text-white p-4 rounded-full"
+      >
+        <ShoppingCart size={24} />
+      </Button>
+
+      {viewMode === 'card' && foodItems.length > 0 && (
         <div className="w-[826px] h-screen bg-white right-0 top-0 fixed flex flex-col justify-start">
-          <div className="flex">
-            {' '}
+          <div className="flex items-center gap-2">
             <ShoppingCart />
             <h4 className="text-sm">Order Detail</h4>
           </div>
+          <div className="flex gap-4 mt-6">
+            <Badge
+              className={`text-xl px-3 rounded-full cursor-pointer h-9 ${
+                viewMode === 'card' ? 'bg-red-500 text-white' : ''
+              }`}
+              onClick={() => setViewMode('card')}
+            >
+              Card
+            </Badge>
+            <Badge
+              onClick={() => setViewMode('order')}
+              className="text-xl px-3 rounded-full cursor-pointer h-9"
+            >
+              Order
+            </Badge>
+          </div>
+
           <div className="mt-4">
             {foodItems.map((item, index) => (
               <div key={index} className="flex justify-between">
@@ -222,13 +245,51 @@ export const CategoryList = () => {
             ))}
           </div>
           <div className="mt-4 flex justify-between">
-            <span className=" text-xl">Total Price</span>
-            <span className=" text-xl">{totalPrice}</span>
+            <span className="text-xl">Total Price</span>
+            <span className="text-xl">{totalPrice}</span>
           </div>
-          <Button
-            onClick={handlePlaceOrder}
-            className="mt-6 w-full bg-red-500 "
-          >
+          <Button onClick={handlePlaceOrder} className="mt-6 w-full bg-red-500">
+            Place Order
+          </Button>
+        </div>
+      )}
+
+      {viewMode === 'order' && foodItems.length > 0 && (
+        <div className="w-[826px] h-screen bg-white right-0 top-0 fixed flex flex-col justify-start">
+          <div className="flex items-center gap-2">
+            <ShoppingCart />
+            <h4 className="text-sm">Order Detail</h4>
+          </div>
+          <div className="flex gap-4 mt-6">
+            <Badge
+              onClick={() => setViewMode('card')}
+              className="text-xl px-3 rounded-full cursor-pointer h-9"
+            >
+              Card
+            </Badge>
+            <Badge
+              onClick={() => setViewMode('order')}
+              className={`text-xl px-3 rounded-full cursor-pointer h-9 ${
+                viewMode === 'order' ? 'bg-red-500 text-white' : ''
+              }`}
+            >
+              Order
+            </Badge>
+          </div>
+
+          <div className="mt-4">
+            {foodItems.map((item, index) => (
+              <div key={index} className="flex justify-between">
+                <span>{item.name}</span>
+                <span>{item.price}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 flex justify-between">
+            <span className="text-xl">Total Price</span>
+            <span className="text-xl">{totalPrice}</span>
+          </div>
+          <Button onClick={handlePlaceOrder} className="mt-6 w-full bg-red-500">
             Place Order
           </Button>
         </div>

@@ -11,11 +11,11 @@ import { Input } from '@/components/ui/input';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
-
 export const LogedIn = () => {
   const [emailVisible, setEmailVisible] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<'card' | 'order'>('card'); // Manage view mode
   const router = useRouter();
 
   const [isMounted, setIsMounted] = useState(false);
@@ -50,6 +50,9 @@ export const LogedIn = () => {
       }
     }
   };
+  const toggleCartView = () => {
+    setViewMode(viewMode === 'order' ? 'card' : 'order');
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
@@ -72,7 +75,11 @@ export const LogedIn = () => {
         <ChevronRight className="ml-auto text-gray-600" />
       </div>
 
-      <Button variant={'secondary'} className="rounded-full w-9">
+      <Button
+        variant={'secondary'}
+        className="rounded-full w-9"
+        onClick={toggleCartView}
+      >
         <ShoppingCart />
       </Button>
 
