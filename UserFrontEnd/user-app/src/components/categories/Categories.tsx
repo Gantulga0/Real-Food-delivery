@@ -218,6 +218,12 @@ export const CategoryList = () => {
           <div className="flex items-center gap-2">
             <ShoppingCart />
             <h4 className="text-sm">Order Detail</h4>
+            <Button
+              onClick={() => setViewMode('card')} // Close the order details view
+              className="ml-auto bg-red-500 text-white"
+            >
+              Close
+            </Button>
           </div>
           <div className="flex gap-4 mt-6">
             <Badge
@@ -259,6 +265,13 @@ export const CategoryList = () => {
           <div className="flex items-center gap-2">
             <ShoppingCart />
             <h4 className="text-sm">Order Detail</h4>
+            {/* Close Button */}
+            <Button
+              onClick={() => setViewMode('card')} // Close the order details view
+              className="ml-auto bg-red-500 text-white"
+            >
+              Close
+            </Button>
           </div>
           <div className="flex gap-4 mt-6">
             <Badge
