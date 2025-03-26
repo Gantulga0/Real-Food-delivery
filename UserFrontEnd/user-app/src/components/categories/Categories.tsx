@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { Button } from '../ui/button';
 import FoodDetailsModal from '../FoodDetail';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X } from 'lucide-react';
 
 interface Category {
   categoryName: string;
@@ -13,6 +13,7 @@ interface Category {
 }
 
 interface Food {
+  _id: string;
   foodName: string;
   price: number;
   image: string;
@@ -20,8 +21,11 @@ interface Food {
 }
 
 interface FoodItem {
+  id: string;
   name: string;
   price: number;
+  quantity: number;
+  foodId: string;
 }
 
 export const CategoryList = () => {
@@ -34,7 +38,8 @@ export const CategoryList = () => {
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
-  const [viewMode, setViewMode] = useState<'card' | 'order'>('card'); // Manage view mode
+  const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'card' | 'order'>('card');
 
   const userId = 'USER_ID';
 
@@ -60,6 +65,7 @@ export const CategoryList = () => {
     if (!categoryId) return;
 
     try {
+      setLoading(true);
       const foodResponse = await axios.get(`http://localhost:4000/food`, {
         params: { categoryId },
       });
@@ -69,22 +75,64 @@ export const CategoryList = () => {
       }
 
       setFoods(foodResponse.data.foods);
+      setLoading(false);
     } catch (err) {
       setError('Failed to fetch foods');
+      setLoading(false);
     }
   };
 
   const handleAddOrder = (food: Food) => {
     setFoodItems((prevItems) => {
-      const updatedItems = [
-        ...prevItems,
-        { name: food.foodName, price: food.price },
-      ];
-      setTotalPrice(
-        updatedItems.reduce((total, item) => total + item.price, 0)
-      );
+      const existingItem = prevItems.find((item) => item.foodId === food._id);
+
+      if (existingItem) {
+        const updatedItems = prevItems.map((item) =>
+          item.foodId === food._id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+        updateTotalPrice(updatedItems);
+        return updatedItems;
+      } else {
+        const newItem = {
+          id: `${food._id}-${Date.now()}`,
+          name: food.foodName,
+          price: food.price,
+          quantity: 1,
+          foodId: food._id,
+        };
+        const updatedItems = [...prevItems, newItem];
+        updateTotalPrice(updatedItems);
+        return updatedItems;
+      }
+    });
+  };
+
+  const handleRemoveItemFromCart = (itemId: string) => {
+    setFoodItems((prevItems) => {
+      const updatedItems = prevItems.filter((item) => item.id !== itemId);
+      updateTotalPrice(updatedItems);
       return updatedItems;
     });
+  };
+
+  const updateQuantity = (itemId: string, newQuantity: number) => {
+    if (newQuantity < 1) return;
+
+    setFoodItems((prevItems) => {
+      const updatedItems = prevItems.map((item) =>
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
+      );
+      updateTotalPrice(updatedItems);
+      return updatedItems;
+    });
+  };
+
+  const updateTotalPrice = (items: FoodItem[]) => {
+    setTotalPrice(
+      items.reduce((total, item) => total + item.price * item.quantity, 0)
+    );
   };
 
   const handleCategoryClick = (categoryId: string) => {
@@ -104,7 +152,7 @@ export const CategoryList = () => {
       alert('Order created successfully!');
       setFoodItems([]);
       setTotalPrice(0);
-      setViewMode('card');
+      setIsOrderDetailOpen(false);
     } catch (error) {
       alert('Error creating order!');
       console.error(error);
@@ -120,6 +168,7 @@ export const CategoryList = () => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setSelectedFood(null);
   };
 
   const addToCart = (food: Food) => {
@@ -127,8 +176,8 @@ export const CategoryList = () => {
     closeModal();
   };
 
-  const toggleCartView = () => {
-    setViewMode(viewMode === 'order' ? 'card' : 'order');
+  const toggleOrderDetail = () => {
+    setIsOrderDetailOpen(!isOrderDetailOpen);
   };
 
   useEffect(() => {
@@ -142,9 +191,9 @@ export const CategoryList = () => {
     <div className="px-80 mt-8">
       <h2 className="text-white text-3xl font-semibold">Categories</h2>
       <ul className="text-black flex gap-10 mt-9 max-w-[1800px] overflow-auto mb-9">
-        {categories.map((category, index) => (
+        {categories.map((category) => (
           <Badge
-            key={index}
+            key={category._id}
             variant={
               selectedCategory === category._id ? 'outline' : 'secondary'
             }
@@ -166,11 +215,11 @@ export const CategoryList = () => {
               No foods available in this category
             </p>
           ) : (
-            <div className="flex justify-between mt-6">
-              {foods.map((food, index) => (
+            <div className="flex justify-between flex-wrap mt-6">
+              {foods.map((food) => (
                 <Card
-                  key={index}
-                  className="w-full max-w-[400px] cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:opacity-80 p-3 flex flex-col flex-wrap mb-9"
+                  key={food._id}
+                  className="w-full max-w-[400px] cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:opacity-80 p-3 flex flex-col mb-9"
                 >
                   <CardHeader className="p-0 relative">
                     <Image
@@ -184,7 +233,10 @@ export const CategoryList = () => {
                     />
                     <Button
                       className="w-11 h-11 rounded-full bg-white text-red-500 hover:bg-gray-300 absolute top-3/4 left-[310px]"
-                      onClick={() => handleAddOrder(food)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddOrder(food);
+                      }}
                     >
                       +
                     </Button>
@@ -197,7 +249,7 @@ export const CategoryList = () => {
                       {food.foodName}
                     </div>
                     <div className="overflow-hidden text-ellipsis line-clamp-2 text-xl text-foreground h-8 flex items-center">
-                      {food.price}
+                      ${food.price.toFixed(2)}
                     </div>
                   </CardFooter>
                   <div className="p-2 text-sm">{food.ingredients}</div>
@@ -209,24 +261,31 @@ export const CategoryList = () => {
       )}
 
       <Button
-        onClick={toggleCartView}
+        onClick={toggleOrderDetail}
         className="fixed bottom-8 right-8 bg-red-500 text-white p-4 rounded-full"
+        disabled={foodItems.length === 0}
       >
         <ShoppingCart size={24} />
+        {foodItems.length > 0 && (
+          <span className="absolute -top-2 -right-2 bg-white text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-sm">
+            {foodItems.length}
+          </span>
+        )}
       </Button>
 
-      {viewMode === 'card' && foodItems.length > 0 && (
-        <div className="w-[826px] h-screen bg-white right-0 top-0 fixed flex flex-col justify-start">
+      {isOrderDetailOpen && (
+        <div className="w-[826px] h-screen bg-white right-0 top-0 fixed flex flex-col justify-start p-10 overflow-y-auto">
           <div className="flex items-center gap-2">
             <ShoppingCart />
             <h4 className="text-sm">Order Detail</h4>
             <Button
-              onClick={() => setViewMode('card')} // Close the order details view
+              onClick={() => setIsOrderDetailOpen(false)}
               className="ml-auto bg-red-500 text-white"
             >
-              X
+              <X size={18} />
             </Button>
           </div>
+
           <div className="flex gap-4 mt-6">
             <Badge
               className={`text-xl px-3 rounded-full cursor-pointer h-9 ${
@@ -237,76 +296,85 @@ export const CategoryList = () => {
               Card
             </Badge>
             <Badge
-              onClick={() => setViewMode('order')}
-              className="text-xl px-3 rounded-full cursor-pointer h-9"
-            >
-              Order
-            </Badge>
-          </div>
-
-          <div className="mt-4">
-            {foodItems.map((item, index) => (
-              <div key={index} className="flex justify-between">
-                <span>{item.name}</span>
-                <span>{item.price}</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 flex justify-between">
-            <span className="text-xl">Total Price</span>
-            <span className="text-xl">{totalPrice}</span>
-          </div>
-          <Button onClick={handlePlaceOrder} className="mt-6 w-full bg-red-500">
-            Place Order
-          </Button>
-        </div>
-      )}
-
-      {viewMode === 'order' && foodItems.length > 0 && (
-        <div className="w-[826px] h-screen bg-white right-0 top-0 fixed flex flex-col justify-start">
-          <div className="flex items-center gap-2">
-            <ShoppingCart />
-            <h4 className="text-sm">Order Detail</h4>
-            {/* Close Button */}
-            <Button
-              onClick={() => setViewMode('card')} // Close the order details view
-              className="ml-auto bg-red-500 text-white"
-            >
-              X
-            </Button>
-          </div>
-          <div className="flex gap-4 mt-6">
-            <Badge
-              onClick={() => setViewMode('card')}
-              className="text-xl px-3 rounded-full cursor-pointer h-9"
-            >
-              Card
-            </Badge>
-            <Badge
-              onClick={() => setViewMode('order')}
               className={`text-xl px-3 rounded-full cursor-pointer h-9 ${
                 viewMode === 'order' ? 'bg-red-500 text-white' : ''
               }`}
+              onClick={() => setViewMode('order')}
             >
               Order
             </Badge>
           </div>
 
-          <div className="mt-4">
-            {foodItems.map((item, index) => (
-              <div key={index} className="flex justify-between">
-                <span>{item.name}</span>
-                <span>{item.price}</span>
-              </div>
-            ))}
+          <div className="text-2xl font-bold mt-4">
+            {viewMode === 'card' ? 'My Cart' : 'Order Details'}
           </div>
-          <div className="mt-4 flex justify-between">
-            <span className="text-xl">Total Price</span>
-            <span className="text-xl">{totalPrice}</span>
+
+          {viewMode === 'card' ? (
+            <div className="mt-6 grid grid-cols-2 gap-4">
+              {foodItems.map((item) => (
+                <Card
+                  key={item.id}
+                  className="cursor-pointer p-3 flex flex-col mb-4 border"
+                >
+                  <CardHeader className="p-0 relative">
+                    <div className="flex items-center gap-4">
+                      <Image
+                        src={
+                          foods.find((f) => f._id === item.foodId)?.image || ''
+                        }
+                        alt={item.name}
+                        width={100}
+                        height={100}
+                        className="object-cover rounded"
+                      />
+                      <div className="flex-1">
+                        <div className="text-xl text-red-500">{item.name}</div>
+                        <div className="text-lg">${item.price.toFixed(2)}</div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardFooter className="flex justify-end p-0 mt-2">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleRemoveItemFromCart(item.id)}
+                    >
+                      <X size={16} />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-6 space-y-4">
+              {foodItems.length === 0 ? (
+                <p>Your cart is empty</p>
+              ) : (
+                foodItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-4 border-b"
+                  >
+                    {/* Keep your existing order view content here */}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          <div className="mt-auto border-t pt-4">
+            <div className="flex justify-between text-xl font-bold">
+              <span>Total:</span>
+              <span>${totalPrice.toFixed(2)}</span>
+            </div>
+            <Button
+              onClick={handlePlaceOrder}
+              className="mt-6 w-full bg-red-500"
+              disabled={foodItems.length === 0 || loading}
+            >
+              {loading ? 'Processing...' : 'Place Order'}
+            </Button>
           </div>
-          <Button onClick={handlePlaceOrder} className="mt-6 w-full bg-red-500">
-            Place Order
-          </Button>
         </div>
       )}
 
@@ -314,7 +382,7 @@ export const CategoryList = () => {
         <FoodDetailsModal
           food={selectedFood}
           onClose={closeModal}
-          onAddToCart={addToCart}
+          onAddToCart={() => addToCart(selectedFood)}
         />
       )}
     </div>
