@@ -102,7 +102,6 @@ export const CategoryList = () => {
       });
 
       alert('Order created successfully!');
-      // Clear cart after placing the order
       setFoodItems([]);
       setTotalPrice(0);
       setViewMode('card');
@@ -142,7 +141,7 @@ export const CategoryList = () => {
   return (
     <div className="px-80 mt-8">
       <h2 className="text-white text-3xl font-semibold">Categories</h2>
-      <ul className="text-black flex gap-10 mt-9 max-w-[1800px] overflow-auto">
+      <ul className="text-black flex gap-10 mt-9 max-w-[1800px] overflow-auto mb-9">
         {categories.map((category, index) => (
           <Badge
             key={index}
@@ -171,14 +170,14 @@ export const CategoryList = () => {
               {foods.map((food, index) => (
                 <Card
                   key={index}
-                  className="w-full max-w-[400px] cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:opacity-80 p-3 flex flex-col flex-wrap"
-                  onClick={() => openFoodDetails(food)}
+                  className="w-full max-w-[400px] cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:opacity-80 p-3 flex flex-col flex-wrap mb-9"
                 >
                   <CardHeader className="p-0 relative">
                     <Image
                       src={food.image}
                       alt={food.foodName}
                       className="object-cover rounded"
+                      onClick={() => openFoodDetails(food)}
                       width={400}
                       height={210}
                       quality={100}
@@ -190,7 +189,10 @@ export const CategoryList = () => {
                       +
                     </Button>
                   </CardHeader>
-                  <CardFooter className="flex p-2 items-start justify-between">
+                  <CardFooter
+                    className="flex p-2 items-start justify-between"
+                    onClick={() => openFoodDetails(food)}
+                  >
                     <div className="overflow-hidden text-ellipsis line-clamp-2 text-2xl text-foreground text-red-500 h-8">
                       {food.foodName}
                     </div>
@@ -222,7 +224,7 @@ export const CategoryList = () => {
               onClick={() => setViewMode('card')} // Close the order details view
               className="ml-auto bg-red-500 text-white"
             >
-              Close
+              X
             </Button>
           </div>
           <div className="flex gap-4 mt-6">
@@ -270,7 +272,7 @@ export const CategoryList = () => {
               onClick={() => setViewMode('card')} // Close the order details view
               className="ml-auto bg-red-500 text-white"
             >
-              Close
+              X
             </Button>
           </div>
           <div className="flex gap-4 mt-6">
