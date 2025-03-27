@@ -1,14 +1,9 @@
 import { FC, useState } from 'react';
 import Image from 'next/image';
 import { Button } from './ui/button';
+import { Food } from '@/types/food';
 
-interface Food {
-  foodName: string;
-  price: number;
-  image: string;
-  ingredients: string;
-  _id: string; // Ensure this is included
-}
+
 
 interface FoodDetailsModalProps {
   food: Food;

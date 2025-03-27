@@ -2,21 +2,9 @@ import { ShoppingCart, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CartItem } from './CartItem';
-interface Food {
-  _id: string;
-  foodName: string;
-  price: number;
-  image: string;
-  ingredients: string;
-}
+import { Food } from '@/types/food';
+import { FoodItem } from '@/types/card';
 
-interface FoodItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  foodId: string;
-}
 interface OrderDetailProps {
   viewMode: 'card' | 'order';
   foodItems: FoodItem[];

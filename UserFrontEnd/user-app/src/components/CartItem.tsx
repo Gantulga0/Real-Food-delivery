@@ -2,21 +2,9 @@ import { Card, CardHeader, CardFooter } from '@/components/ui/card';
 import Image from 'next/image';
 import { Button } from './ui/button';
 import { Minus, Plus, X } from 'lucide-react';
-interface Food {
-  _id: string;
-  foodName: string;
-  price: number;
-  image: string;
-  ingredients: string;
-}
+import { FoodItem } from '@/types/card';
+import { Food } from '@/types/food';
 
-interface FoodItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  foodId: string;
-}
 interface CartItemProps {
   item: FoodItem;
   food?: Food;

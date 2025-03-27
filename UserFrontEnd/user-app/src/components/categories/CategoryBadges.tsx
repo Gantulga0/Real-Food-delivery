@@ -1,9 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-
-interface Category {
-  categoryName: string;
-  _id: string;
-}
+import { Category } from '@/types/category';
 
 interface CategoryBadgesProps {
   categories: Category[];
