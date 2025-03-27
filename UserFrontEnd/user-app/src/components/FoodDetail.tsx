@@ -7,12 +7,13 @@ interface Food {
   price: number;
   image: string;
   ingredients: string;
+  _id: string; // Ensure this is included
 }
 
 interface FoodDetailsModalProps {
   food: Food;
   onClose: () => void;
-  onAddToCart: (food: Food) => void; // New prop for adding to cart
+  onAddToCart: (food: Food, quantity: number) => void;
 }
 
 const FoodDetailsModal: FC<FoodDetailsModalProps> = ({
@@ -26,6 +27,7 @@ const FoodDetailsModal: FC<FoodDetailsModalProps> = ({
     const value = Math.max(1, parseInt(e.target.value, 10));
     setQuantity(value);
   };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white rounded-lg w-[800px] h-[400px] flex">
@@ -60,7 +62,7 @@ const FoodDetailsModal: FC<FoodDetailsModalProps> = ({
             <div className="mt-4 flex items-center justify-between w-[350px]">
               <div className="text-lg">
                 <p className="text-lg text-black">Total Price:</p>
-                <p className=" font-bold text-lg">
+                <p className="font-bold text-lg">
                   ${(food.price * quantity).toFixed(2)}
                 </p>
               </div>
@@ -81,7 +83,7 @@ const FoodDetailsModal: FC<FoodDetailsModalProps> = ({
             </div>
             <div className="mt-4 flex justify-between">
               <Button
-                onClick={() => onAddToCart(food)}
+                onClick={() => onAddToCart(food, quantity)}
                 className="w-full bg-black text-white mb-4"
               >
                 Add to Cart
