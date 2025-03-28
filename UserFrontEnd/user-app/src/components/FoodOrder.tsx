@@ -1,9 +1,18 @@
-import { ShoppingCart, X } from 'lucide-react';
+import { useState } from 'react';
+import {
+  ShoppingCart,
+  X,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Truck,
+} from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CartItem } from './CartItem';
 import { Food } from '@/types/food';
 import { FoodItem } from '@/types/card';
+import { format } from 'date-fns';
 
 interface OrderDetailProps {
   viewMode: 'card' | 'order';
@@ -11,6 +20,8 @@ interface OrderDetailProps {
   foods: Food[];
   totalPrice: number;
   loading: boolean;
+  orderStatus?: 'PENDING' | 'CANCELLED' | 'DELIVERED';
+  orderDate?: Date;
   onSetViewMode: (mode: 'card' | 'order') => void;
   onUpdateQuantity: (itemId: string, newQuantity: number) => void;
   onRemoveItem: (itemId: string) => void;
@@ -19,82 +30,180 @@ interface OrderDetailProps {
 }
 
 export const OrderDetail = ({
-  viewMode,
-  foodItems,
-  foods,
-  totalPrice,
-  loading,
+  viewMode = 'card',
+  foodItems = [],
+  foods = [],
+  totalPrice = 0,
+  loading = false,
+  orderStatus = 'PENDING',
+  orderDate = new Date(),
   onSetViewMode,
   onUpdateQuantity,
   onRemoveItem,
   onPlaceOrder,
   onClose,
-}: OrderDetailProps) => (
-  <div className="w-[826px] h-screen bg-white right-0 top-0 fixed flex flex-col justify-start p-10 overflow-y-auto">
-    <div className="flex items-center gap-2">
-      <ShoppingCart />
-      <h4 className="text-sm">Order Detail</h4>
-      <Button
-        onClick={onClose}
-        className="ml-auto bg-white text-red-500 border border-red-500 rounded-full h-12 hover:bg-red-200"
-      >
-        <X size={18} />
-      </Button>
-    </div>
+}: OrderDetailProps) => {
+  const handleSetViewMode =
+    onSetViewMode || ((mode) => console.log(`View mode set to ${mode}`));
+  const handleUpdateQuantity =
+    onUpdateQuantity ||
+    ((id, qty) => console.log(`Update quantity ${id} to ${qty}`));
+  const handleRemoveItem =
+    onRemoveItem || ((id) => console.log(`Remove item ${id}`));
+  const handlePlaceOrder = onPlaceOrder || (() => console.log('Place order'));
+  const handleClose = onClose || (() => console.log('Close'));
 
-    <div className="flex gap-4 mt-6">
-      <Badge
-        className={`text-xl px-3 rounded-full cursor-pointer h-9 ${
-          viewMode === 'card' ? 'bg-red-500 text-white' : ''
-        }`}
-        onClick={() => onSetViewMode('card')}
-      >
-        Card
-      </Badge>
-      <Badge
-        className={`text-xl px-3 rounded-full cursor-pointer h-9 bg-white text-black hover:bg-gray-200${
-          viewMode === 'order' ? 'bg-red-500 text-white' : ''
-        }`}
-        onClick={() => onSetViewMode('order')}
-      >
-        Order
-      </Badge>
-    </div>
+  const getStatusDisplay = () => {
+    switch (orderStatus) {
+      case 'PENDING':
+        return {
+          icon: <Clock className="text-yellow-500" />,
+          text: 'Pending',
+          color: 'bg-yellow-100 text-yellow-800',
+        };
+      case 'DELIVERED':
+        return {
+          icon: <CheckCircle className="text-green-500" />,
+          text: 'Delivered',
+          color: 'bg-green-100 text-green-800',
+        };
+      case 'CANCELLED':
+        return {
+          icon: <XCircle className="text-red-500" />,
+          text: 'Cancelled',
+          color: 'bg-red-100 text-red-800',
+        };
+      default:
+        return {
+          icon: <Clock className="text-gray-500" />,
+          text: 'Unknown',
+          color: 'bg-gray-100 text-gray-800',
+        };
+    }
+  };
 
-    <div className="text-2xl font-bold mt-4">
-      {viewMode === 'card' ? 'My Cart' : 'Order Details'}
-    </div>
+  const statusDisplay = getStatusDisplay();
 
-    {viewMode === 'card' ? (
-      <div className="mt-6 gap-4">
-        {foodItems.map((item) => {
-          const food = foods.find((f) => f._id === item.foodId);
-          return (
-            <CartItem
-              key={item.id}
-              item={item}
-              onUpdateQuantity={onUpdateQuantity}
-              onRemoveItem={onRemoveItem}
-            />
-          );
-        })}
+  return (
+    <div className="w-[826px] h-screen bg-white right-0 top-0 fixed flex flex-col justify-start p-10 overflow-y-auto">
+      <div className="flex items-center gap-2">
+        <ShoppingCart />
+        <h4 className="text-sm">Order Detail</h4>
+        <Button
+          onClick={handleClose}
+          className="ml-auto bg-white text-red-500 border border-red-500 rounded-full h-12 hover:bg-red-200"
+        >
+          <X size={18} />
+        </Button>
       </div>
-    ) : (
-      <div className="mt-6 space-y-4">{/* Order view content */}</div>
-    )}
 
-    <div className="mt-auto border-t pt-4">
-      <div className="flex justify-between text-xl font-bold">
-        <span>Total:</span>
-        <span>${totalPrice.toFixed(2)}</span>
+      <div className="flex gap-4 mt-6">
+        <Badge
+          className={`text-xl px-3 rounded-full cursor-pointer h-9 ${
+            viewMode === 'card'
+              ? 'bg-red-500 text-white'
+              : 'bg-white text-black hover:bg-gray-200'
+          }`}
+          onClick={() => handleSetViewMode('card')}
+        >
+          Card
+        </Badge>
+        <Badge
+          className={`text-xl px-3 rounded-full cursor-pointer h-9 ${
+            viewMode === 'order'
+              ? 'bg-red-500 text-white'
+              : 'bg-white text-black hover:bg-gray-200'
+          }`}
+          onClick={() => handleSetViewMode('order')}
+        >
+          Order
+        </Badge>
       </div>
-      <Button
-        onClick={onPlaceOrder}
-        className="mt-6 w-full bg-red-500"
-        disabled={foodItems.length === 0 || loading}
-      >
-        {loading ? 'Processing...' : 'Place Order'}
-      </Button>
+
+      <div className="text-2xl font-bold mt-4">
+        {viewMode === 'card' ? 'My Cart' : 'Order Details'}
+      </div>
+
+      {viewMode === 'card' ? (
+        <div className="mt-6 gap-4">
+          {foodItems.map((item) => {
+            const food = foods.find((f) => f._id === item.foodId);
+            return (
+              <CartItem
+                key={item.id}
+                item={item}
+                onUpdateQuantity={handleUpdateQuantity}
+                onRemoveItem={handleRemoveItem}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        <div className="mt-6 space-y-6">
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-2">
+              {statusDisplay.icon}
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${statusDisplay.color}`}
+              >
+                {statusDisplay.text}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-500">
+              <Clock size={16} />
+              <span>{format(orderDate, 'MMM dd, yyyy h:mm a')}</span>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">Order Items</h3>
+            {foodItems.map((item) => {
+              const food = foods.find((f) => f._id === item.foodId);
+              return (
+                <div
+                  key={item.id}
+                  className="flex justify-between items-center p-3 border-b"
+                >
+                  <div className="flex items-center gap-4">
+                    {food?.image && (
+                      <img
+                        src={food.image}
+                        alt={food.foodName}
+                        className="w-16 h-16 object-cover rounded-md"
+                      />
+                    )}
+                    <div>
+                      <h4 className="font-medium">
+                        {food?.foodName || item.name}
+                      </h4>
+                      <p className="text-sm text-gray-500">
+                        Qty: {item.quantity}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="font-medium">
+                    ${((food?.price || item.price) * item.quantity).toFixed(2)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-auto border-t pt-4">
+        <div className="flex justify-between text-xl font-bold">
+          <span>Total:</span>
+          <span>${totalPrice.toFixed(2)}</span>
+        </div>
+        <Button
+          onClick={handlePlaceOrder}
+          className="mt-6 w-full bg-red-500"
+          disabled={foodItems.length === 0 || loading}
+        >
+          {loading ? 'Processing...' : 'Place Order'}
+        </Button>
+      </div>
     </div>
-  </div>
-);
+  );
+};

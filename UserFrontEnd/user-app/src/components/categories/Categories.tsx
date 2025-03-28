@@ -32,7 +32,7 @@ export const CategoryList = () => {
     updateItemQuantity,
   } = useCart();
   const { loading: orderLoading, placeOrder } = useOrder();
-
+  const [viewMode, setViewMode] = useState<'card' | 'order'>('card');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
@@ -139,12 +139,10 @@ export const CategoryList = () => {
           onUpdateQuantity={updateItemQuantity}
           onPlaceOrder={handlePlaceOrder}
           onClose={() => setIsOrderDetailOpen(false)}
-          viewMode={'card'}
-          foods={[]}
-          loading={false}
-          onSetViewMode={function (mode: 'card' | 'order'): void {
-            throw new Error('Function not implemented.');
-          }}
+          viewMode={viewMode} // Use the state instead of hardcoded value
+          foods={foods} // Pass actual foods array
+          loading={orderLoading} // Pass actual loading state
+          onSetViewMode={setViewMode}
         />
       )}
 
