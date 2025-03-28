@@ -31,7 +31,6 @@ export const OrderDetail = ({
   onClose,
 }: OrderDetailProps) => (
   <div className="w-[826px] h-screen bg-white right-0 top-0 fixed flex flex-col justify-start p-10 overflow-y-auto">
-    {/* Header */}
     <div className="flex items-center gap-2">
       <ShoppingCart />
       <h4 className="text-sm">Order Detail</h4>
@@ -43,7 +42,6 @@ export const OrderDetail = ({
       </Button>
     </div>
 
-    {/* View Mode Toggles */}
     <div className="flex gap-4 mt-6">
       <Badge
         className={`text-xl px-3 rounded-full cursor-pointer h-9 ${
@@ -63,7 +61,6 @@ export const OrderDetail = ({
       </Badge>
     </div>
 
-    {/* Content */}
     <div className="text-2xl font-bold mt-4">
       {viewMode === 'card' ? 'My Cart' : 'Order Details'}
     </div>
@@ -76,7 +73,6 @@ export const OrderDetail = ({
             <CartItem
               key={item.id}
               item={item}
-              food={food}
               onUpdateQuantity={onUpdateQuantity}
               onRemoveItem={onRemoveItem}
             />
@@ -87,7 +83,6 @@ export const OrderDetail = ({
       <div className="mt-6 space-y-4">{/* Order view content */}</div>
     )}
 
-    {/* Footer */}
     <div className="mt-auto border-t pt-4">
       <div className="flex justify-between text-xl font-bold">
         <span>Total:</span>

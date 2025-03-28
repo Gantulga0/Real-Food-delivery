@@ -1,4 +1,3 @@
-// hooks/useFoods.ts
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Food } from '@/types/food';
@@ -9,8 +8,11 @@ export const useFoods = (categoryId: string | null) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!categoryId) return;
     const fetchFoods = async () => {
+      if (!categoryId) {
+        setLoading(false);
+        return;
+      }
       try {
         const response = await axios.get('http://localhost:4000/food', {
           params: { categoryId },

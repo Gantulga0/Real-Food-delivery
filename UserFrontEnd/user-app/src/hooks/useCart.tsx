@@ -1,9 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FoodItem } from '@/types/card';
 
 export const useCart = () => {
-  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
-  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [foodItems, setFoodItems] = useState<FoodItem[]>(() => {
+    return JSON.parse(localStorage.getItem('cart') || '{}').items || [];
+  });
+  const [totalPrice, setTotalPrice] = useState<number>(() => {
+    return JSON.parse(localStorage.getItem('cart') || '{}').totalPrice || 0;
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(
+        'cart',
+        JSON.stringify({
+          items: foodItems,
+          totalPrice,
+        })
+      );
+    }
+  }, [foodItems, totalPrice]);
 
   const addItemToCart = (food: FoodItem, quantity: number) => {
     setFoodItems((prevItems) => {

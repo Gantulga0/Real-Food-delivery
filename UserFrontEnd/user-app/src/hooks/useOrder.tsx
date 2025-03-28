@@ -1,10 +1,10 @@
-// src/hooks/useOrder.ts
 import { useState } from 'react';
 import axios from 'axios';
 import { FoodItem } from '@/types/card';
 
 export const useOrder = () => {
   const [loading, setLoading] = useState(false);
+
 
   const placeOrder = async (
     userId: string,
@@ -18,14 +18,16 @@ export const useOrder = () => {
         foodItems,
         totalPrice,
       });
+      console.log(response);
       alert('Order created successfully!');
       setLoading(false);
+
     } catch (error) {
       alert('Error creating order!');
-      console.error(error);
+      console.log(error);
       setLoading(false);
     }
   };
 
-  return { loading, placeOrder };
+  return { loading, placeOrder};
 };
