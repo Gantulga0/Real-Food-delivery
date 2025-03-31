@@ -85,10 +85,10 @@ export const OrderDetail = ({
   const statusDisplay = getStatusDisplay();
 
   return (
-    <div className="w-[826px] h-screen bg-white right-0 top-0 fixed flex flex-col justify-start p-10 overflow-y-auto">
+    <div className="w-[535px] h-screen bg-neutral-700 right-0 top-0 fixed flex flex-col justify-start p-10 overflow-y-auto rounded-l-3xl">
       <div className="flex items-center gap-2">
-        <ShoppingCart />
-        <h4 className="text-sm">Order Detail</h4>
+        <ShoppingCart className="text-white" />
+        <h4 className="text-sm text-white ">Order Detail</h4>
         <Button
           onClick={handleClose}
           className="ml-auto bg-white text-red-500 border border-red-500 rounded-full h-12 hover:bg-red-200"
@@ -97,9 +97,9 @@ export const OrderDetail = ({
         </Button>
       </div>
 
-      <div className="flex gap-4 mt-6">
+      <div className="flex gap-1 mt-6 bg-white p-1 rounded-full">
         <Badge
-          className={`text-xl px-3 rounded-full cursor-pointer h-9 ${
+          className={`text-xl px-3 rounded-full cursor-pointer h-9 w-[220px] flex justify-center ${
             viewMode === 'card'
               ? 'bg-red-500 text-white'
               : 'bg-white text-black hover:bg-gray-200'
@@ -109,7 +109,7 @@ export const OrderDetail = ({
           Card
         </Badge>
         <Badge
-          className={`text-xl px-3 rounded-full cursor-pointer h-9 ${
+          className={`text-xl px-3 rounded-full cursor-pointer h-9 w-[220px] flex justify-center ${
             viewMode === 'order'
               ? 'bg-red-500 text-white'
               : 'bg-white text-black hover:bg-gray-200'
@@ -120,12 +120,9 @@ export const OrderDetail = ({
         </Badge>
       </div>
 
-      <div className="text-2xl font-bold mt-4">
-        {viewMode === 'card' ? 'My Cart' : 'Order Details'}
-      </div>
-
       {viewMode === 'card' ? (
-        <div className="mt-6 gap-4">
+        <div className="mt-6 gap-4 bg-white rounded-2xl p-4">
+          <p className="text-xl font-semibold ">My cart</p>
           {foodItems.map((item) => {
             const food = foods.find((f) => f._id === item.foodId);
             return (

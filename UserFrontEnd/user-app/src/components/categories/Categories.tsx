@@ -139,9 +139,9 @@ export const CategoryList = () => {
           onUpdateQuantity={updateItemQuantity}
           onPlaceOrder={handlePlaceOrder}
           onClose={() => setIsOrderDetailOpen(false)}
-          viewMode={viewMode} // Use the state instead of hardcoded value
-          foods={foods} // Pass actual foods array
-          loading={orderLoading} // Pass actual loading state
+          viewMode={viewMode}
+          foods={foods}
+          loading={orderLoading}
           onSetViewMode={setViewMode}
         />
       )}
