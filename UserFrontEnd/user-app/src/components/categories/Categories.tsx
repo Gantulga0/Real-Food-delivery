@@ -8,9 +8,11 @@ import { useCategories } from '@/hooks/useCategories';
 import { useFoods } from '@/hooks/useFoods';
 import { useCart } from '@/hooks/useCart';
 import { useOrder } from '@/hooks/useOrder';
+import { useAuth } from '@/hooks/auth-context';
 import { Category } from '@/types/category';
 import { Food } from '@/types/food';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export const CategoryList = () => {
   const {
@@ -32,22 +34,30 @@ export const CategoryList = () => {
     updateItemQuantity,
   } = useCart();
   const { loading: orderLoading, placeOrder } = useOrder();
+  const { user } = useAuth();
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<'card' | 'order'>('card');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
-
-  const userId = 'USER_ID';
 
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);
   };
 
   const handlePlaceOrder = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
     try {
-      await placeOrder(userId, foodItems, totalPrice);
+      await placeOrder(user.id, foodItems, totalPrice);
+      foodItems.forEach((item) => removeItemFromCart(item.id));
+      alert('Order placed successfully!');
+      setIsOrderDetailOpen(false);
     } catch (error) {
-      console.error('Error placing order', error);
+      console.error('Order placement failed:', error);
     }
   };
 
@@ -66,14 +76,12 @@ export const CategoryList = () => {
   };
 
   if (categoriesLoading || foodsLoading) {
-    console.log(categoriesLoading, foodsLoading);
-
     return <p className="text-white">Loading...</p>;
   }
-  if (categoriesError || foodsError)
-    return <p className="text-red-500">{categoriesError || foodsError}</p>;
 
-  console.log(foodItems);
+  if (categoriesError || foodsError) {
+    return <p className="text-red-500">{categoriesError || foodsError}</p>;
+  }
 
   return (
     <div className="px-80 mt-8">

@@ -4,7 +4,7 @@ import { FoodItem } from '@/types/card';
 
 export const useOrder = () => {
   const [loading, setLoading] = useState(false);
-
+  const [error, setError] = useState<string | null>(null);
 
   const placeOrder = async (
     userId: string,
@@ -12,22 +12,21 @@ export const useOrder = () => {
     totalPrice: number
   ) => {
     setLoading(true);
+    setError(null);
     try {
       const response = await axios.post('http://localhost:4000/food-order', {
-        _id: userId,
+        userId, // Changed from _id to userId for clarity
         foodItems,
         totalPrice,
       });
-      console.log(response);
-      alert('Order created successfully!');
       setLoading(false);
-
+      return response.data; // Return the response data
     } catch (error) {
-      alert('Error creating order!');
-      console.log(error);
+      setError('Error creating order!');
       setLoading(false);
+      throw error; // Re-throw the error to handle it in the component
     }
   };
 
-  return { loading, placeOrder};
+  return { loading, error, placeOrder };
 };

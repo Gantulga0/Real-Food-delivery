@@ -15,7 +15,7 @@ export const LogedIn = () => {
   const [emailVisible, setEmailVisible] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [viewMode, setViewMode] = useState<'card' | 'order'>('card'); // Manage view mode
+  const [viewMode, setViewMode] = useState<'card' | 'order'>('card');
   const router = useRouter();
 
   const [isMounted, setIsMounted] = useState(false);

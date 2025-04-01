@@ -13,6 +13,7 @@ import { CartItem } from './CartItem';
 import { Food } from '@/types/food';
 import { FoodItem } from '@/types/card';
 import { format } from 'date-fns';
+import { useAuth } from '@/hooks/auth-context';
 
 interface OrderDetailProps {
   viewMode: 'card' | 'order';
@@ -52,6 +53,7 @@ export const OrderDetail = ({
     onRemoveItem || ((id) => console.log(`Remove item ${id}`));
   const handlePlaceOrder = onPlaceOrder || (() => console.log('Place order'));
   const handleClose = onClose || (() => console.log('Close'));
+  const { user } = useAuth();
 
   const getStatusDisplay = () => {
     switch (orderStatus) {
