@@ -10,7 +10,12 @@ export const getUser = async (req, res) => {
       return res.status(404).send({ message: 'User not found' });
     }
 
-    res.send({ message: 'User found successfully!', user });
+    const { password, ...userWithoutPassword } = user.toObject();
+
+    res.send({
+      message: 'User found successfully!',
+      user: userWithoutPassword,
+    });
   } catch (error) {
     res
       .status(500)
