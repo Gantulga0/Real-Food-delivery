@@ -10,7 +10,7 @@ export const foodOrder = async (req, res) => {
   try {
     const newFoodOrder = new FoodOrder({
       user: _id,
-      food_items: foodItems,
+      food_order_items: foodItems,
       total_price: totalPrice,
       status: 'PENDING',
     });
