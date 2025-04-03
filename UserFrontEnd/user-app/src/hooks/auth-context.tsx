@@ -7,10 +7,9 @@ import {
 } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { set } from 'date-fns';
 
 interface User {
-  id: string;
+  _id: string;
   email: string;
 }
 
@@ -40,6 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               Authorization: `Bearer ${token}`,
             },
           });
+          console.log('User logged in:', response.data.user);
           setUser(response.data.user);
           setIsAuthenticated(true);
         }
@@ -65,6 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       localStorage.setItem('authToken', response.data.token);
       setUser(response.data.user);
+      console.log('User logged in:', response.data.user);
       setIsAuthenticated(true);
       router.push('/');
     } catch (error) {

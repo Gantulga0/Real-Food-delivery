@@ -9,7 +9,6 @@ import { useFoods } from '@/hooks/useFoods';
 import { useCart } from '@/hooks/useCart';
 import { useOrder } from '@/hooks/useOrder';
 import { useAuth } from '@/hooks/auth-context';
-import { Category } from '@/types/category';
 import { Food } from '@/types/food';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -52,7 +51,7 @@ export const CategoryList = () => {
     }
 
     try {
-      await placeOrder(user.id, foodItems, totalPrice);
+      await placeOrder(user._id, foodItems, totalPrice);
       foodItems.forEach((item) => removeItemFromCart(item.id));
       alert('Order placed successfully!');
       setIsOrderDetailOpen(false);
@@ -129,7 +128,6 @@ export const CategoryList = () => {
       <Button
         onClick={toggleOrderDetail}
         className="fixed bottom-8 right-8 bg-red-500 text-white p-4 rounded-full"
-        disabled={foodItems.length === 0 || orderLoading}
       >
         <ShoppingCart size={24} />
         {foodItems.length > 0 && (

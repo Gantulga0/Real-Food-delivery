@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Eye } from 'lucide-react';
 import { EyeClosed } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 
 export default function Home() {
   const [email, setEmail] = useState<string>('');

@@ -1,11 +1,10 @@
-import { useState } from 'react';
 import {
   ShoppingCart,
   X,
   Clock,
   CheckCircle,
   XCircle,
-  Truck,
+  ListOrdered,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,13 +20,19 @@ interface OrderDetailProps {
   foods: Food[];
   totalPrice: number;
   loading: boolean;
-  orderStatus?: 'PENDING' | 'CANCELLED' | 'DELIVERED';
-  orderDate?: Date;
+  orders?: Array<{
+    _id: string;
+    items: FoodItem[];
+    totalPrice: number;
+    status: 'PENDING' | 'CANCELLED' | 'DELIVERED';
+    createdAt: string;
+  }>;
   onSetViewMode: (mode: 'card' | 'order') => void;
-  onUpdateQuantity: (itemId: string, newQuantity: number) => void;
-  onRemoveItem: (itemId: string) => void;
+  onUpdateQuantity?: (itemId: string, newQuantity: number) => void;
+  onRemoveItem?: (itemId: string) => void;
   onPlaceOrder: () => void;
   onClose: () => void;
+  onSelectOrder?: (orderId: string) => void;
 }
 
 export const OrderDetail = ({
@@ -36,27 +41,18 @@ export const OrderDetail = ({
   foods = [],
   totalPrice = 0,
   loading = false,
-  orderStatus = 'PENDING',
-  orderDate = new Date(),
+  orders = [],
   onSetViewMode,
   onUpdateQuantity,
   onRemoveItem,
   onPlaceOrder,
   onClose,
+  onSelectOrder,
 }: OrderDetailProps) => {
-  const handleSetViewMode =
-    onSetViewMode || ((mode) => console.log(`View mode set to ${mode}`));
-  const handleUpdateQuantity =
-    onUpdateQuantity ||
-    ((id, qty) => console.log(`Update quantity ${id} to ${qty}`));
-  const handleRemoveItem =
-    onRemoveItem || ((id) => console.log(`Remove item ${id}`));
-  const handlePlaceOrder = onPlaceOrder || (() => console.log('Place order'));
-  const handleClose = onClose || (() => console.log('Close'));
   const { user } = useAuth();
 
-  const getStatusDisplay = () => {
-    switch (orderStatus) {
+  const getStatusDisplay = (status: 'PENDING' | 'CANCELLED' | 'DELIVERED') => {
+    switch (status) {
       case 'PENDING':
         return {
           icon: <Clock className="text-yellow-500" />,
@@ -84,15 +80,19 @@ export const OrderDetail = ({
     }
   };
 
-  const statusDisplay = getStatusDisplay();
-
   return (
     <div className="w-[535px] h-screen bg-neutral-700 right-0 top-0 fixed flex flex-col justify-start p-10 overflow-y-auto rounded-l-3xl">
       <div className="flex items-center gap-2">
-        <ShoppingCart className="text-white" />
-        <h4 className="text-sm text-white ">Order Detail</h4>
+        {viewMode === 'card' ? (
+          <ShoppingCart className="text-white" />
+        ) : (
+          <ListOrdered className="text-white" />
+        )}
+        <h4 className="text-sm text-white">
+          {viewMode === 'card' ? 'Order Detail' : 'Order History'}
+        </h4>
         <Button
-          onClick={handleClose}
+          onClick={onClose}
           className="ml-auto bg-white text-red-500 border border-red-500 rounded-full h-12 hover:bg-red-200"
         >
           <X size={18} />
@@ -106,9 +106,9 @@ export const OrderDetail = ({
               ? 'bg-red-500 text-white'
               : 'bg-white text-black hover:bg-gray-200'
           }`}
-          onClick={() => handleSetViewMode('card')}
+          onClick={() => onSetViewMode('card')}
         >
-          Card
+          Cart
         </Badge>
         <Badge
           className={`text-xl px-3 rounded-full cursor-pointer h-9 w-[220px] flex justify-center ${
@@ -116,93 +116,93 @@ export const OrderDetail = ({
               ? 'bg-red-500 text-white'
               : 'bg-white text-black hover:bg-gray-200'
           }`}
-          onClick={() => handleSetViewMode('order')}
+          onClick={() => onSetViewMode('order')}
         >
-          Order
+          Orders
         </Badge>
       </div>
 
       {viewMode === 'card' ? (
         <div className="mt-6 gap-4 bg-white rounded-2xl p-4">
-          <p className="text-xl font-semibold ">My cart</p>
+          <p className="text-xl font-semibold">My cart</p>
           {foodItems.map((item) => {
             const food = foods.find((f) => f._id === item.foodId);
             return (
               <CartItem
                 key={item.id}
                 item={item}
-                onUpdateQuantity={handleUpdateQuantity}
-                onRemoveItem={handleRemoveItem}
+                onUpdateQuantity={onUpdateQuantity || (() => {})}
+                onRemoveItem={onRemoveItem || (() => {})}
               />
             );
           })}
         </div>
       ) : (
-        <div className="mt-6 space-y-6">
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-2">
-              {statusDisplay.icon}
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${statusDisplay.color}`}
-              >
-                {statusDisplay.text}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-500">
-              <Clock size={16} />
-              <span>{format(orderDate, 'MMM dd, yyyy h:mm a')}</span>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Order Items</h3>
-            {foodItems.map((item) => {
-              const food = foods.find((f) => f._id === item.foodId);
-              return (
-                <div
-                  key={item.id}
-                  className="flex justify-between items-center p-3 border-b"
-                >
-                  <div className="flex items-center gap-4">
-                    {food?.image && (
-                      <img
-                        src={food.image}
-                        alt={food.foodName}
-                        className="w-16 h-16 object-cover rounded-md"
-                      />
-                    )}
-                    <div>
-                      <h4 className="font-medium">
-                        {food?.foodName || item.name}
-                      </h4>
-                      <p className="text-sm text-gray-500">
-                        Qty: {item.quantity}
-                      </p>
+        <div className="mt-6 space-y-4">
+          <h3 className="font-semibold text-lg text-white">Order History</h3>
+          {orders.length === 0 ? (
+            <div className="text-white p-4 text-center">No orders found</div>
+          ) : (
+            <div className="space-y-3 max-h-[500px] overflow-y-auto">
+              {orders.map((order) => {
+                const statusDisplay = getStatusDisplay(order.status);
+                return (
+                  <div
+                    key={order._id}
+                    className="p-4 bg-white rounded-lg cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => onSelectOrder?.(order._id)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        {statusDisplay.icon}
+                        <span className="font-medium">
+                          Order #{order._id.slice(-6).toUpperCase()}
+                        </span>
+                      </div>
+                      <span className="font-bold">
+                        ${order.totalPrice.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between mt-2 text-sm text-gray-500">
+                      <span>
+                        {format(
+                          new Date(order.createdAt),
+                          'MMM dd, yyyy h:mm a'
+                        )}
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${statusDisplay.color}`}
+                      >
+                        {statusDisplay.text}
+                      </span>
+                    </div>
+                    <div className="mt-2 text-sm">
+                      {order.items.length} item
+                      {order.items.length !== 1 ? 's' : ''}
                     </div>
                   </div>
-                  <div className="font-medium">
-                    ${((food?.price || item.price) * item.quantity).toFixed(2)}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
-      <div className="mt-auto border-t pt-4">
-        <div className="flex justify-between text-xl font-bold">
-          <span>Total:</span>
-          <span>${totalPrice.toFixed(2)}</span>
+      {viewMode === 'card' && (
+        <div className="mt-auto border-t border-gray-600 pt-4">
+          <div className="flex justify-between text-xl font-bold text-white">
+            <span>Total:</span>
+            <span>${totalPrice.toFixed(2)}</span>
+          </div>
+          <Button
+            onClick={onPlaceOrder}
+            className="mt-6 w-full bg-red-500 hover:bg-red-600 text-white"
+            disabled={foodItems.length === 0 || loading}
+          >
+            {loading ? 'Processing...' : 'Place Order'}
+          </Button>
         </div>
-        <Button
-          onClick={handlePlaceOrder}
-          className="mt-6 w-full bg-red-500"
-          disabled={foodItems.length === 0 || loading}
-        >
-          {loading ? 'Processing...' : 'Place Order'}
-        </Button>
-      </div>
+      )}
     </div>
   );
 };
