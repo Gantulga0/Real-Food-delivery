@@ -32,16 +32,3 @@ export const useOrder = () => {
 
   return { loading, error, placeOrder };
 };
-
-export const getOrderHistory = async (userId: string) => {
-  try {
-    const response = await axios.get(
-      `http://localhost:4000/food-order/${userId}`
-    );
-    console.log('userId', userId);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching order history:', error);
-    throw error;
-  }
-};

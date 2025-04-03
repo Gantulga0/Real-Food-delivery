@@ -13,6 +13,7 @@ import { Food } from '@/types/food';
 import { FoodItem } from '@/types/card';
 import { format } from 'date-fns';
 import { useAuth } from '@/hooks/auth-context';
+import { useOrderHistory } from '@/hooks/useOrderHistory';
 
 interface OrderDetailProps {
   viewMode: 'card' | 'order';
@@ -41,7 +42,6 @@ export const OrderDetail = ({
   foods = [],
   totalPrice = 0,
   loading = false,
-  orders = [],
   onSetViewMode,
   onUpdateQuantity,
   onRemoveItem,
@@ -50,6 +50,9 @@ export const OrderDetail = ({
   onSelectOrder,
 }: OrderDetailProps) => {
   const { user } = useAuth();
+  const { orders } = useOrderHistory(user?._id || '');
+
+  console.log(orders, 'orders');
 
   const getStatusDisplay = (status: 'PENDING' | 'CANCELLED' | 'DELIVERED') => {
     switch (status) {
@@ -146,6 +149,7 @@ export const OrderDetail = ({
             <div className="space-y-3 max-h-[500px] overflow-y-auto">
               {orders.map((order) => {
                 const statusDisplay = getStatusDisplay(order.status);
+
                 return (
                   <div
                     key={order._id}
@@ -160,7 +164,7 @@ export const OrderDetail = ({
                         </span>
                       </div>
                       <span className="font-bold">
-                        ${order.totalPrice.toFixed(2)}
+                        {/* ${order.totalPrice.toFixed(2)} */}
                       </span>
                     </div>
                     <div className="flex justify-between mt-2 text-sm text-gray-500">
@@ -177,8 +181,8 @@ export const OrderDetail = ({
                       </span>
                     </div>
                     <div className="mt-2 text-sm">
-                      {order.items.length} item
-                      {order.items.length !== 1 ? 's' : ''}
+                      {order.food_order_items.length} item
+                      {order.food_order_items.length !== 1 ? 's' : ''}
                     </div>
                   </div>
                 );

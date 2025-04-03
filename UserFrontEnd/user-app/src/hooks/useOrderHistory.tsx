@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getOrderHistory } from './useOrder';
+import axios from 'axios';
 
 export const useOrderHistory = (userId: string) => {
   const [orders, setOrders] = useState<any[]>([]);
@@ -27,4 +27,18 @@ export const useOrderHistory = (userId: string) => {
   }, [userId]);
 
   return { orders, loading, error, refresh: fetchOrderHistory };
+};
+
+export const getOrderHistory = async (userId: string) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:4000/food-order/${userId}`
+    );
+    console.log('userId', userId);
+    console.log('response', response.data);
+    return response.data.userOrders;
+  } catch (error) {
+    console.error('Error fetching order history:', error);
+    throw error;
+  }
 };

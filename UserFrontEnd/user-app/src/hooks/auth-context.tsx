@@ -39,13 +39,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               Authorization: `Bearer ${token}`,
             },
           });
-          console.log('User logged in:', response.data.user);
           setUser(response.data.user);
           setIsAuthenticated(true);
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
-        localStorage.removeItem('authToken');
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          console.log('Session expired or invalid token');
+          localStorage.removeItem('authToken');
+        } else {
+          console.error('Auth check failed:', error);
+        }
         setUser(null);
         setIsAuthenticated(false);
       } finally {
